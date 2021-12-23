@@ -1,11 +1,14 @@
+type Target = new (...args: any[]) => any;
 
 export function Component(Config: ComponentConfig) {
-    return <T extends { new(...args: any[]): {} }>(constructor: T) => {
-        return class extends constructor {
-            _component_config: ComponentConfig = Config;
-            _component_root!: ShadowRoot;
-            _component_changed!: ComponentChanged;
-        }
+    return (target: Target) => {
+        target.prototype._component_config = Config;
+        /*
+            Helper prototype methods
+
+            target.prototype._component_root = undefined; // rendered template
+            target.prototype._component_changed = () => { }; // function to rebind value
+        */
     }
 }
 
@@ -20,10 +23,6 @@ export interface ComponentConfig {
 
 interface Attr {
     [key: string]: any
-}
-
-interface ComponentChanged {
-    (): void
 }
 
 export interface ComponentOnInit {

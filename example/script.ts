@@ -10,8 +10,8 @@ import { Component, Module, RenderModule, RenderOnInit } from '../src'
         <button bind-click="submit()">Submit</button>`
 })
 class ElementComponent {
-    public message: string = 'Message'
-    public count: number = 1
+    public message = 'Message'
+    public count = 1
     public title: string
 
     submit(): void {

@@ -1,12 +1,12 @@
 import { RenderComponent } from "./core/render";
 
+type Target = new (...args: any[]) => any;
+
 export function Module(Config: ModuleConfig) {
-    return <T extends { new(...args: any[]): {} }>(constructor: T) => {
+    return (target: Target) => {
         Config.Component.forEach((component) => RenderComponent(component))
 
-        return class extends constructor {
-            _module_config: ModuleConfig = Config;
-        }
+        target.prototype._module_config = Config;
     }
 }
 
@@ -15,4 +15,4 @@ export interface ModuleConfig {
     Bootstrap?: Component
 }
 
-interface Component extends Function { new(...args: any[]): any; }
+type Component = Target
