@@ -80,7 +80,6 @@ export async function RenderComponent(Component: Component | string, Options?: C
 
             connectedCallback() {
                 // append renderred component
-                const shadow = this.attachShadow({ mode: 'open' });
                 const range = document.createRange()
                 // render component
                 const dom: HTMLElement = RenderComponentTemplate(config.template!, this.component)
@@ -88,7 +87,7 @@ export async function RenderComponent(Component: Component | string, Options?: C
                 range.selectNodeContents(dom)
                 const content = range.extractContents()
 
-                shadow.appendChild(content)
+                content.childNodes.forEach(node => this.appendChild(node))
                 // add attrs
                 for (const key of Object.keys(config.attr || [])) {
                     this.setAttribute(key, config.attr![key])
@@ -99,19 +98,19 @@ export async function RenderComponent(Component: Component | string, Options?: C
                     .forEach((item: AttrItem) => {
                         if (item.name.includes('bind-init-')) {
                             const key = item.name.replace('bind-init-', '')
-                            this.shadowRoot!.querySelector(`[bind-value="${key}"]`)!.innerHTML = item.value
+                            this!.querySelector(`[bind-value="${key}"]`)!.innerHTML = item.value
                             Object.assign(this.component, { [key]: item.value })
                         }
                     });
                 // add element id attr
                 this.setAttribute(this.component._component_id, '')
                 // set component root
-                this.component._component_root = this.shadowRoot
+                this.component._component_root = this
                 // component class data changed detection
                 this.component._component_changed = () => {
                     for (const key of Object.keys(this.component)) {
                         if (!_component_methods.includes(key)) {
-                            this.shadowRoot!.querySelectorAll(`[bind-value="${key}"]`).forEach(item => item.innerHTML = this.component[key])
+                            this.querySelectorAll(`[bind-value="${key}"]`).forEach(item => item.innerHTML = this.component[key])
                         }
                     }
                 }
