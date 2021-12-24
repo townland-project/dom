@@ -141,7 +141,8 @@ export async function RenderComponent(Component: Component | string, Options?: C
         // create component style
         if (config.style) {
             const style = document.createElement('style')
-            style.innerText = config.style
+            style.appendChild(document.createTextNode(config.style))
+            style.setAttribute('type', 'text/css')
             style.setAttribute('component-id', config.id)
             document.head.appendChild(style)
         }
