@@ -1,25 +1,5 @@
 import { Component, Module, RenderModule, RenderOnInit } from '../src'
-
-@Component({
-    id: 'tl-element',
-    template: `
-        <h1 bind-value="message"></h1>
-        <h2 bind-value="title"></h2>
-        <br/>
-        <h3 bind-value="count"></h3>
-        <button bind-click="submit()">Submit</button>`
-})
-class ElementComponent {
-    public message = 'Message'
-    public count = 1
-    public title: string
-
-    submit(): void {
-        this.message = 'Hello World'
-        this.count++
-        (this as any)._component_changed()
-    }
-}
+import { ElementComponent } from './element'
 
 @Component({
     id: 'tl-element-container',
@@ -35,8 +15,7 @@ class ElementComponent {
 class ElementContainerComponent implements RenderOnInit {
     RenderOnInit(): void {
         setTimeout(() => {
-            ((this as any)._component_root as ShadowRoot).getElementById('one').setAttribute('bind-init-title', 'Goodbye')
-
+            document.getElementById('one').setAttribute('bind-init-title', 'Goodbye')
         }, 3000);
     }
 }
