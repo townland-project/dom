@@ -12,6 +12,16 @@ export function Component(Config: ComponentConfig) {
     }
 }
 
+export class ComponentHelper {
+    get Element(): HTMLElement {
+        return (this as any)._component_root
+    }
+
+    ValueChanged() {
+        (this as any)._component_changed()
+    }
+}
+
 export interface ComponentConfig {
     id: string
     template?: string
