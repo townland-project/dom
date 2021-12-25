@@ -209,6 +209,38 @@ function WalkInDom(doc: Document, context: any): HTMLElement {
         }
     })
 
+    element.querySelectorAll('[bind-keyup]').forEach((elem) => {
+        const method = elem.getAttribute('bind-keyup')!
+        const method_name = method.split('(')[0]
+        if (method_name in context) {
+            const values: any[] = method.split('(')[1].split(')')[0].split(',')
+            const func = context[method_name];
+            (elem as HTMLElement).onkeyup = (event) => {
+                if (values.includes('$event')) {
+                    const i = values.indexOf('$event')
+                    values[i] = event
+                }
+                func.bind(context).call(...values);
+            }
+        }
+    })
+    
+    element.querySelectorAll('[bind-keydown]').forEach((elem) => {
+        const method = elem.getAttribute('bind-keydown')!
+        const method_name = method.split('(')[0]
+        if (method_name in context) {
+            const values: any[] = method.split('(')[1].split(')')[0].split(',')
+            const func = context[method_name];
+            (elem as HTMLElement).onkeydown = (event) => {
+                if (values.includes('$event')) {
+                    const i = values.indexOf('$event')
+                    values[i] = event
+                }
+                func.bind(context).call(...values);
+            }
+        }
+    })
+
     element.querySelectorAll('[bind-value]').forEach((elem) => {
         const key = elem.getAttribute('bind-value')!
         if (key in context) {
