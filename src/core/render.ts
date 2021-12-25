@@ -125,25 +125,27 @@ export async function RenderComponent(Component: Component | string, Options?: C
                 if (this.prototype.RenderOnDestroy) this.prototype.RenderOnDestroy.bind(this.component).call()
             }
         }
-        // define new html tag
-        customElements.define(config.id, CustomELement)
-        // fetch style url
-        if (config.styleUrl) {
-            try {
-                const res = await fetch(config.styleUrl)
-                config.style = await res.text()
-            } catch (error) {
-                console.error(`Cannot fetch '${config.id}/${config.styleUrl}'`)
-                return Promise.reject()
+        // define new html tag once
+        if (customElements.get(config.id) == undefined) {
+            customElements.define(config.id, CustomELement)
+            // fetch style url
+            if (config.styleUrl) {
+                try {
+                    const res = await fetch(config.styleUrl)
+                    config.style = await res.text()
+                } catch (error) {
+                    console.error(`Cannot fetch '${config.id}/${config.styleUrl}'`)
+                    return Promise.reject()
+                }
             }
-        }
-        // create component style
-        if (config.style) {
-            const style = document.createElement('style')
-            style.appendChild(document.createTextNode(config.style))
-            style.setAttribute('type', 'text/css')
-            style.setAttribute('component-id', config.id)
-            document.head.appendChild(style)
+            // create component style
+            if (config.style) {
+                const style = document.createElement('style')
+                style.appendChild(document.createTextNode(config.style))
+                style.setAttribute('type', 'text/css')
+                style.setAttribute('component-id', config.id)
+                document.head.appendChild(style)
+            }
         }
     } catch (error) {
         console.error(error)
@@ -224,7 +226,7 @@ function WalkInDom(doc: Document, context: any): HTMLElement {
             }
         }
     })
-    
+
     element.querySelectorAll('[bind-keydown]').forEach((elem) => {
         const method = elem.getAttribute('bind-keydown')!
         const method_name = method.split('(')[0]
