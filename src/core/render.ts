@@ -59,74 +59,75 @@ export async function RenderComponent(Component: Component | string, Options?: C
     }
 
     try {
-        // create custom element 
-        class CustomELement extends HTMLElement {
-            private component: any;
-            private prototype: any;
+        // check custom element defined
+        if (customElements.get(config.id) == undefined) {
+            // create custom element 
+            class CustomELement extends HTMLElement {
+                private component: any;
+                private prototype: any;
 
-            constructor() {
-                super()
-                this.component = typeof Component == 'string' ? components[Component] : new Component();
-                // set component id
-                count++
-                this.component._component_id = `CUID-${count}`
-                // copy render values to component
-                Object.assign(component, Options?.Values || {})
-                // get all methods of class
-                this.prototype = Object.getPrototypeOf(component)
-                // if component on init method exist
-                if (this.prototype.ComponentOnInit) this.prototype.ComponentOnInit.bind(component).call()
-            }
-
-            connectedCallback() {
-                // append renderred component
-                const range = document.createRange()
-                // render component
-                const dom: HTMLElement = RenderComponentTemplate(config.template!, this.component)
-
-                range.selectNodeContents(dom)
-                const content = range.extractContents()
-
-                content.childNodes.forEach(node => this.appendChild(node))
-                // add attrs
-                for (const key of Object.keys(config.attr || [])) {
-                    this.setAttribute(key, config.attr![key])
+                constructor() {
+                    super()
+                    this.component = typeof Component == 'string' ? components[Component] : new Component();
+                    // set component id
+                    count++
+                    this.component._component_id = `CUID-${count}`
+                    // copy render values to component
+                    Object.assign(this.component, Options?.Values || {})
+                    // get all methods of class
+                    this.prototype = Object.getPrototypeOf(this.component)
+                    // if component on init method exist
+                    if (this.prototype.ComponentOnInit) this.prototype.ComponentOnInit.bind(component).call()
                 }
-                // set init value
-                [].slice
-                    .apply(this.attributes)
-                    .forEach((item: AttrItem) => {
-                        if (item.name.includes('bind-init-')) {
-                            const key = item.name.replace('bind-init-', '')
-                            this!.querySelector(`[bind-value="${key}"]`)!.innerHTML = item.value
-                            Object.assign(this.component, { [key]: item.value })
-                        }
-                    });
-                // add element id attr
-                this.setAttribute(this.component._component_id, '')
-                // set component root
-                this.component._component_root = this
-                // component class data changed detection
-                this.component._component_changed = () => {
-                    for (const key of Object.keys(this.component)) {
-                        if (!_component_methods.includes(key)) {
-                            this.querySelectorAll(`[bind-value="${key}"]`).forEach(item => item.innerHTML = this.component[key])
+
+                connectedCallback() {
+                    // append renderred component
+                    const range = document.createRange()
+                    // render component
+                    const dom: HTMLElement = RenderComponentTemplate(config.template!, this.component)
+
+                    range.selectNodeContents(dom)
+                    const content = range.extractContents()
+
+                    content.childNodes.forEach(node => this.appendChild(node))
+                    // add attrs
+                    for (const key of Object.keys(config.attr || [])) {
+                        this.setAttribute(key, config.attr![key])
+                    }
+                    // set init value
+                    [].slice
+                        .apply(this.attributes)
+                        .forEach((item: AttrItem) => {
+                            if (item.name.includes('bind-init-')) {
+                                const key = item.name.replace('bind-init-', '')
+                                this!.querySelector(`[bind-value="${key}"]`)!.innerHTML = item.value
+                                Object.assign(this.component, { [key]: item.value })
+                            }
+                        });
+                    // add element id attr
+                    this.setAttribute(this.component._component_id, '')
+                    // set component root
+                    this.component._component_root = this
+                    // component class data changed detection
+                    this.component._component_changed = () => {
+                        for (const key of Object.keys(this.component)) {
+                            if (!_component_methods.includes(key)) {
+                                this.querySelectorAll(`[bind-value="${key}"]`).forEach(item => item.innerHTML = this.component[key])
+                            }
                         }
                     }
+                    // run on render init                
+                    if (this.prototype.RenderOnInit) this.prototype.RenderOnInit.bind(this.component).call()
+                    // add element to change detector
+                    observer.observe(this, { attributes: true, childList: true, subtree: true })
                 }
-                // run on render init                
-                if (this.prototype.RenderOnInit) this.prototype.RenderOnInit.bind(this.component).call()
-                // add element to change detector
-                observer.observe(this, { attributes: true, childList: true, subtree: true })
-            }
 
-            disconnectedCallback() {
-                // if render on destroy method exist
-                if (this.prototype.RenderOnDestroy) this.prototype.RenderOnDestroy.bind(this.component).call()
+                disconnectedCallback() {
+                    // if render on destroy method exist
+                    if (this.prototype.RenderOnDestroy) this.prototype.RenderOnDestroy.bind(this.component).call()
+                }
             }
-        }
-        // define new html tag once
-        if (customElements.get(config.id) == undefined) {
+            // define new html tag once
             customElements.define(config.id, CustomELement)
             // fetch style url
             if (config.styleUrl) {
