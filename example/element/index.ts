@@ -1,4 +1,4 @@
-import { Attribute, Component, ComponentHelper } from '../../src'
+import { Attribute, Bind, Component, ComponentHelper } from '../../src'
 
 @Component({
     id: 'tl-element',
@@ -6,8 +6,8 @@ import { Attribute, Component, ComponentHelper } from '../../src'
     template: require('./index.html')
 })
 export class ElementComponent extends ComponentHelper {
-    public message = 'Message'
-    public count = 1
+    @Bind('message') message = 'Message'
+    @Bind('count') count = 1
     @Attribute('title') title: string = 'HW'
 
     AttributeOnChange() {
@@ -17,6 +17,5 @@ export class ElementComponent extends ComponentHelper {
     submit(): void {
         this.message = 'Hello World'
         this.count++
-        this.ValueChanged()
     }
 }
