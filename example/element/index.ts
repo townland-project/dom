@@ -8,7 +8,7 @@ import { Attribute, Bind, Component, ComponentHelper } from '../../src'
 export class ElementComponent extends ComponentHelper {
     @Bind('message') message = 'Message'
     @Bind('count') count = 1
-    @Attribute('title') title: string = 'HW'
+    @Attribute('title') title = 'HW'
 
     AttributeOnChange() {
         console.log(this.Attributes)
