@@ -1,6 +1,6 @@
 {
   "name": "@townland-project/dom",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Dom interpreter",
   "main": "dist/index.js",
   "scripts": {
