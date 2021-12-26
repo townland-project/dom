@@ -1,18 +1,22 @@
-import { Component } from '../../src'
+import { Attribute, Component, ComponentHelper } from '../../src'
 
 @Component({
     id: 'tl-element',
     style: require('./styles.css'),
     template: require('./index.html')
 })
-export class ElementComponent {
+export class ElementComponent extends ComponentHelper {
     public message = 'Message'
     public count = 1
-    public title: string
+    @Attribute('title') title: string = 'HW'
+
+    AttributeOnChange() {
+        console.log(this.Attributes)
+    }
 
     submit(): void {
         this.message = 'Hello World'
         this.count++
-        (this as any)._component_changed()
+        this.ValueChanged()
     }
 }

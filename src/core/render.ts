@@ -69,6 +69,10 @@ export async function RenderComponent(Component: Component | string, Options?: C
                 constructor() {
                     super()
                     this.component = typeof Component == 'string' ? components[Component] : new Component();
+                    // delete useless config
+                    delete (this.component as any)._component_config
+                    // set empty component attr
+                    this.component._component_attr = {}
                     // set component id
                     count++
                     this.component._component_id = `CUID-${count}`
@@ -101,7 +105,7 @@ export async function RenderComponent(Component: Component | string, Options?: C
                             if (item.name.includes('bind-init-')) {
                                 const key = item.name.replace('bind-init-', '')
                                 this!.querySelector(`[bind-value="${key}"]`)!.innerHTML = item.value
-                                Object.assign(this.component, { [key]: item.value })
+                                Object.assign(this.component._component_attr, { [key]: item.value })
                             }
                         });
                     // add element id attr
@@ -266,8 +270,9 @@ function OnChangeDetected(mutations: MutationRecord[]) {
                         value = (mutation.target as HTMLElement).getAttribute(mutation.attributeName),
                         component = (mutation.target as any).component
 
-                    component[key] = value
-                    component._component_changed()
+                    component._component_attr[key] = value
+                    component._component_root!.querySelector(`[bind-value="${key}"]`)!.innerHTML = value
+                    if(component.AttributeOnChange) component.AttributeOnChange()
                 }
             }
         }
