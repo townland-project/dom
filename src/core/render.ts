@@ -171,16 +171,16 @@ export async function RenderComponent(Component: Component | string, Options?: C
     }
     // add style attr                    
     if (Options?.Styles) {
-        let styles = Object.keys(Options.Styles).map((key) => `${key}: ${Options.Styles![key]}`).join(';')
+        const styles = Object.keys(Options.Styles).map((key) => `${key}: ${Options.Styles![key]}`).join(';')
         Object.assign(config.attr, { 'style': styles })
     }
 
     // set bind init from value options
-    if (Options?.Values) {
-        for (let key of Object.keys(Options.Values)) {
-            Object.assign(config.attr, { [`bind-init-${key}`]: Options.Values[key] })
-        }
-    }
+    // if (Options?.Values) {
+    //     for (const key of Object.keys(Options.Values)) {
+    //         Object.assign(config.attr, { [`bind-init-${key}`]: Options.Values[key] })
+    //     }
+    // }
 
     // add attrs
     for (const key of Object.keys(config.attr || [])) {
@@ -196,7 +196,7 @@ function RenderComponentTemplate(template: string, context: any): HTMLElement {
     // convert string template to dom
     const dom = new DOMParser().parseFromString(template, 'text/html')
 
-    return WalkInDom(dom, context)
+    return WalkInDom(dom.body, context)
 }
 
 function GetValueOf(key: string, context: any): any {
@@ -208,9 +208,7 @@ function GetValueOf(key: string, context: any): any {
     }
 }
 
-function WalkInDom(doc: Document, context: any): HTMLElement {
-    const element = doc.body
-
+function WalkInDom(element: HTMLElement, context: any): HTMLElement {
     element.querySelectorAll('[bind-click]').forEach((elem) => {
         const method = elem.getAttribute('bind-click')!
         const method_name = method.split('(')[0]
@@ -222,8 +220,10 @@ function WalkInDom(doc: Document, context: any): HTMLElement {
                     const i = values.indexOf('$event')
                     values[i] = event
                 }
-                func.bind(context).call(...values);
+                func.apply(context, values)
             }
+
+            elem.removeAttribute('bind-click')
         }
     })
 
@@ -238,8 +238,10 @@ function WalkInDom(doc: Document, context: any): HTMLElement {
                     const i = values.indexOf('$event')
                     values[i] = event
                 }
-                func.bind(context).call(...values);
+                func.apply(context, values)
             }
+
+            elem.removeAttribute('bind-change')
         }
     })
 
@@ -254,8 +256,10 @@ function WalkInDom(doc: Document, context: any): HTMLElement {
                     const i = values.indexOf('$event')
                     values[i] = event
                 }
-                func.bind(context).call(...values);
+                func.apply(context, values)
             }
+
+            elem.removeAttribute('bind-keyup')
         }
     })
 
@@ -270,8 +274,10 @@ function WalkInDom(doc: Document, context: any): HTMLElement {
                     const i = values.indexOf('$event')
                     values[i] = event
                 }
-                func.bind(context).call(...values);
+                func.apply(context, values)
             }
+
+            elem.removeAttribute('bind-keydown')
         }
     })
 
