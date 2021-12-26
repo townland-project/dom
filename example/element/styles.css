@@ -2,3 +2,7 @@ button {
     cursor: pointer;
     box-shadow: 0 3px rgba(0, 0, 0, 0.2);
 }
+
+tl-element.colored-h1 h1 {
+    color: var(--h1-color);
+}

@@ -1,4 +1,4 @@
-import { Component, Module, RenderModule, RenderOnInit } from '../src'
+import { Component, ComponentHelper, Module, RenderComponent, RenderModule, RenderOnInit } from '../src'
 import { ElementComponent } from './element'
 
 @Component({
@@ -12,11 +12,23 @@ import { ElementComponent } from './element'
         'class': 'flex column'
     }
 })
-class ElementContainerComponent implements RenderOnInit {
+class ElementContainerComponent extends ComponentHelper implements RenderOnInit {
     RenderOnInit(): void {
         setTimeout(() => {
             document.getElementById('one').setAttribute('bind-init-title', 'Goodbye')
         }, 3000);
+
+        RenderComponent(ElementComponent, {
+            Styles: {
+                '--h1-color': 'red'
+            },
+            Classes: 'colored-h1',
+            Values: {
+                title: 'Hello-4'
+            }
+        }).then(element=> {
+            this.Element.appendChild(element)
+        })
     }
 }
 

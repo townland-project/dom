@@ -14,12 +14,15 @@ type Target = new (...args: any[]) => any;
 
 type Module = Target
 type Component = Target
-interface ValuesElement {
+interface KeyValue {
     [key: string]: any
 }
 
 interface ComponentOptions {
-    Values?: ValuesElement
+    Values?: KeyValue
+    Styles?: KeyValue
+    Classes?: string | string[]
+    Attributes?: KeyValue
 }
 
 interface ComponentMap {
@@ -93,11 +96,7 @@ export async function RenderComponent(Component: Component | string, Options?: C
                     range.selectNodeContents(dom)
                     const content = range.extractContents()
 
-                    content.childNodes.forEach(node => this.appendChild(node))
-                    // add attrs
-                    for (const key of Object.keys(config.attr || [])) {
-                        this.setAttribute(key, config.attr![key])
-                    }
+                    content.childNodes.forEach(node => this.appendChild(node));
                     // set init value
                     [].slice
                         .apply(this.attributes)
@@ -155,10 +154,38 @@ export async function RenderComponent(Component: Component | string, Options?: C
     } catch (error) {
         console.error(error)
     }
-    // create element
-    const element = document.createElement(config.id)
     // add component to map
     if (typeof Component != 'string') components[config.id] = component
+    // create element
+    const element = document.createElement(config.id)
+
+    // create empty attr object
+    if (!config.attr) config.attr = {}
+    // copy attrs from options
+    if (Options?.Attributes) Object.assign(config.attr, Options.Attributes)
+    // copy classes from options
+    if (Options?.Classes) {
+        let classes: string[] = typeof Options.Classes == 'string' ? Options.Classes.split(' ') : Options.Classes
+        if (config.attr['class']) classes = config.attr['class'].split(' ')
+        Object.assign(config.attr, { 'class': [...new Set(classes)].join(' ') })
+    }
+    // add style attr                    
+    if (Options?.Styles) {
+        let styles = Object.keys(Options.Styles).map((key) => `${key}: ${Options.Styles![key]}`).join(';')
+        Object.assign(config.attr, { 'style': styles })
+    }
+
+    // set bind init from value options
+    if (Options?.Values) {
+        for (let key of Object.keys(Options.Values)) {
+            Object.assign(config.attr, { [`bind-init-${key}`]: Options.Values[key] })
+        }
+    }
+
+    // add attrs
+    for (const key of Object.keys(config.attr || [])) {
+        element.setAttribute(key, config.attr![key])
+    }
 
     return element
 }
@@ -272,7 +299,7 @@ function OnChangeDetected(mutations: MutationRecord[]) {
 
                     component._component_attr[key] = value
                     component._component_root!.querySelector(`[bind-value="${key}"]`)!.innerHTML = value
-                    if(component.AttributeOnChange) component.AttributeOnChange()
+                    if (component.AttributeOnChange) component.AttributeOnChange()
                 }
             }
         }
